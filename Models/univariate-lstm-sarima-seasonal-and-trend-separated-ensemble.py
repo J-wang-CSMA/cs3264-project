@@ -27,8 +27,8 @@ def load_and_preprocess_data(filepath):
 
 # Split data into training and test sets
 def split_data(total_df):
-    train = total_df[(total_df['Date'] >= '2000-01-01') & (total_df['Date'] <= '2014-12-31')]
-    test = total_df[(total_df['Date'] >= '2015-01-01') & (total_df['Date'] <= '2023-12-31')]
+    train = total_df[(total_df['Date'] >= '1980-01-01') & (total_df['Date'] <= '2000-12-31')]
+    test = total_df[(total_df['Date'] >= '2001-01-01') & (total_df['Date'] <= '2024-12-31')]
     return train, test
 
 
@@ -68,7 +68,7 @@ def main():
     y_train.index.freq = 'MS'
     y_test.index = pd.DatetimeIndex(y_test.index).to_period('M').to_timestamp();
     y_test.index.freq = 'MS'
-
+    print(test_df)
     # Fit a purely seasonal SARIMA model (captures annual seasonality)
     seasonal_model = SARIMAX(y_train, order=(0, 0, 0), seasonal_order=(1, 1, 1, 12),
                              enforce_stationarity=True, enforce_invertibility=True)
@@ -92,8 +92,8 @@ def main():
     # Train the LSTM on deseasonalized (trend) training data
     lstm_model = TrendLSTM(input_size=1, hidden_size=64, num_layers=1, output_size=1)
     optimizer = optim.Adam(lstm_model.parameters(), lr=0.005)
-    criterion = nn.MSELoss()
-    epochs = 500
+    criterion = nn.HuberLoss(delta=0.001)
+    epochs = 300
     for epoch in range(epochs):
         lstm_model.train()
         optimizer.zero_grad()
@@ -123,7 +123,7 @@ def main():
 
     # Align forecasts: discard first 'lookback' points for seasonal and trend forecasts
     seasonal_test_aligned = seasonal_test_pred.iloc[lookback:]
-    alpha = 1.0  # scaling factor for the trend component
+    alpha = 1.25  # scaling factor for the trend component
     final_forecast = seasonal_test_aligned.values + alpha * deseason_test_pred
     actual_test_aligned = y_test.iloc[lookback:]
 
@@ -170,8 +170,8 @@ def main():
     })
     breakdown_df['Difference'] = breakdown_df['Actual'] - breakdown_df['Hybrid']
     breakdown_df['Proportional_Difference'] = breakdown_df['Difference'] / breakdown_df['Actual']
-    low = breakdown_df['Proportional_Difference'].quantile(0.10)
-    high = breakdown_df['Proportional_Difference'].quantile(0.90)
+    low = breakdown_df['Proportional_Difference'].quantile(0.01)
+    high = breakdown_df['Proportional_Difference'].quantile(0.99)
     filtered = breakdown_df[(breakdown_df['Proportional_Difference'] >= low) &
                             (breakdown_df['Proportional_Difference'] <= high)]
     print("Mean Proportional Difference (filtered):", filtered['Proportional_Difference'].mean())

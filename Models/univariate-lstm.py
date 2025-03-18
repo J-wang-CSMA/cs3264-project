@@ -123,9 +123,9 @@ def main():
     plt.plot(test_dates, y_test_inverse, label='Actual')
     plt.plot(test_dates, test_pred_inverse, label='Predicted')
     plt.title('Visitors Prediction (with Month Encoding)')
-    plt.xlabel('Date');
+    plt.xlabel('Date')
     plt.ylabel('Number of Visitors')
-    plt.legend();
+    plt.legend()
     plt.tight_layout()
     plt.show()
 

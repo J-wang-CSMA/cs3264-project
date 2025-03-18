@@ -123,6 +123,7 @@ def main():
 
     # Align LSTM forecast with test set
     test_dates = test_df['Date'].iloc[lookback:]
+    print(test_df['TotalVisitors'])
     sarima_forecast_aligned = sarima_forecast.iloc[lookback:]
 
     # Weighted ensemble of SARIMA and LSTM
