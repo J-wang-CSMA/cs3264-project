@@ -104,7 +104,6 @@ def main():
         if (epoch + 1) % 20 == 0:
             print(f"LSTM Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.10f}")
 
-    # Capture hidden states
     hook_handle = lstm_model.lstm.register_forward_hook(hook_fn)
     lstm_model.eval()
     hidden_states.clear()
@@ -126,8 +125,6 @@ def main():
     plt.ylabel("PC2")
     plt.show()
 
-    # Associate each hidden state with its corresponding date
-    # The i-th sequence corresponds to y_train.index[i + lookback]
     sequence_dates = y_train.index[lookback:]
     pca_df = pd.DataFrame({
         'PC1': pca_result[:, 0],
@@ -205,20 +202,15 @@ def main():
     plt.colorbar(sc, label='Year')
     plt.show()
 
-    # ----- SHAP Analysis Section -----
-    # We'll use shap.KernelExplainer on a small subset of data
     import shap
 
-    # Flatten each sample from shape (lookback, 1) to (lookback,) for shap
-    # because KernelExplainer treats each dimension as a separate feature.
     X_train_flat = X_train_tensor.numpy().reshape(X_train_tensor.shape[0], -1)
 
-    # We'll pick a small random subset of training data as "background" for SHAP
-    background_size = min(200, X_train_flat.shape[0])  # up to 50 samples
+
+    background_size = min(200, X_train_flat.shape[0])
     background_data = X_train_flat[:background_size]
 
-    # Similarly, pick a few test samples for demonstration
-    # We'll do the same flattening approach for test
+
     steps = len(y_test)
     seasonal_forecast_obj = seasonal_fit.get_forecast(steps=steps)
     seasonal_test_pred = seasonal_forecast_obj.predicted_mean
@@ -229,27 +221,19 @@ def main():
     X_test_flat = X_test_tensor.numpy().reshape(X_test_tensor.shape[0], -1)
 
     def model_predict(data_np):
-        # data_np shape: (batch_size, lookback)
-        # we need to reshape back to (batch_size, lookback, 1)
         data_torch = torch.tensor(data_np.reshape(-1, lookback, 1), dtype=torch.float32)
         with torch.no_grad():
             preds = lstm_model(data_torch).numpy().flatten()
         return preds
 
-    # Create the KernelExplainer with a small background
     explainer = shap.KernelExplainer(model_predict, background_data)
-
-    # We'll pick e.g. 10 samples from test for demonstration
     test_size = min(24, X_test_flat.shape[0])
     test_subset = X_test_flat[:test_size]
 
     shap_values = explainer.shap_values(test_subset)
 
-    # Summaries of shap values
     shap.summary_plot(shap_values, test_subset, plot_type="bar", feature_names=[f"t{i}" for i in range(lookback)])
     shap.summary_plot(shap_values, test_subset, feature_names=[f"t{i}" for i in range(lookback)])
-
-    # Forecast seasonal component on the test period using SARIMA
     steps = len(y_test)
     seasonal_forecast_obj = seasonal_fit.get_forecast(steps=steps)
     seasonal_test_pred = seasonal_forecast_obj.predicted_mean

@@ -113,24 +113,17 @@ def test_model(model, test_df, feature_cols, target_col, lookback, scaler=None,
 
 
 def train_model_deseasonalized(train_df, target_col, lookback, hyperparams):
-    # Extract and standardize the target series.
     y_train_series = set_series_monthly_frequency(train_df.set_index('Date')[target_col])
 
-    # Use deseasonalize_data (from models.seasonal_sarima) to get seasonal components.
-    # seasonal_results = (seasonal_fit, seasonal_train_pred, deseason_train, seasonal_test_pred, deseason_test)
     seasonal_results = deseasonalize_data(y_train_series, y_train_series)
     seasonal_fit, seasonal_train_pred, deseason_train, _, _ = seasonal_results
 
-    # Compute the deseasonalized training series (trend+residual).
-    # Scale the deseasonalized training series.
     scaler_deseason = MinMaxScaler(feature_range=(0, 1))
     deseason_train_scaled = scaler_deseason.fit_transform(deseason_train.values.reshape(-1, 1))
-    # Create sequences from the scaled, deseasonalized data.
     X_train, y_train_seq = create_sequences(deseason_train_scaled, lookback)
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
     y_train_tensor = torch.tensor(y_train_seq, dtype=torch.float32)
 
-    # In deseasonalized training, we train only on the target so input_size=1.
     hidden_size = hyperparams.get('hidden_size', 70)
     num_layers = hyperparams.get('num_layers', 1)
     output_size = hyperparams.get('output_size', 1)
