@@ -3,10 +3,10 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-from src.models.lstm import TrendLSTM  # or your multivariate LSTM model if named differently
-from src.preprocessing_and_feature_engineering.feature_engineering import create_sequences
-from src.preprocessing_and_feature_engineering.preprocessing import set_series_monthly_frequency
-from src.models.seasonal_sarima import deseasonalize_data
+from models.lstm import TrendLSTM  # or your multivariate LSTM model if named differently
+from preprocessing_and_feature_engineering.feature_engineering import create_sequences
+from preprocessing_and_feature_engineering.preprocessing import set_series_monthly_frequency
+from models.seasonal_sarima import deseasonalize_data
 
 def train_model(train_df, feature_cols, target_col, lookback, hyperparams):
     # Extract the training data for the chosen features

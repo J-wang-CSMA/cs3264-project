@@ -25,8 +25,8 @@ def load_and_preprocess(filepaths, required_rows, date_format='%Y %b', reverse_c
     return out_df.dropna(subset=[c for c in out_df.columns if c != 'Date'])
 
 def split_data_by_date(df, date_col='Date',
-                       train_start='1988-01-01', train_end='2000-12-31',
-                       test_start='2001-01-01', test_end='2025-12-31'):
+                       train_start='1990-01-01', train_end='2009-12-31',
+                       test_start='2010-01-01', test_end='2025-12-31'):
     """Split df by date range into train & test."""
     train = df[(df[date_col] >= train_start) & (df[date_col] <= train_end)]
     test = df[(df[date_col] >= test_start) & (df[date_col] <= test_end)]

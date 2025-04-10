@@ -3,8 +3,8 @@ from preprocessing_and_feature_engineering.preprocessing import main_preprocessi
 from training.training_loop import train_model, train_model_deseasonalized, test_model
 import torch
 import torch.nn as nn
-from src.models.seasonal_sarima import deseasonalize_data
-from src.utils.visualize_predictions import (
+from models.seasonal_sarima import deseasonalize_data
+from utils.visualize_predictions import (
     plot_seasonal_vs_actual,
     plot_hybrid_vs_actual,
     plot_combined_forecasts,
@@ -23,7 +23,62 @@ def main():
         '../Datasets/food_beverage_services_index_base_year_2017.csv',
         '../Datasets/retail_sales_index_base_year_2017.csv',
     ]
-    required_rows = ['Total International Visitor Arrivals By Inbound Tourism Markets']
+    required_rows = [
+            'Total International Visitor Arrivals By Inbound Tourism Markets',
+            '  Southeast Asia',
+            '  Greater China',
+            '  North Asia',
+            '  South Asia',
+            '  West Asia',
+            '  Americas',
+            '  Europe',
+            '  Oceania',
+            '  Africa',
+            'US Dollar (Singapore Dollar Per US Dollar)',
+            'Sterling Pound (Singapore Dollar Per Pound Sterling)',
+            'Swiss Franc (Singapore Dollar Per Swiss Franc)',
+            'Japanese Yen (Singapore Dollar Per 100 Japanese Yen)',
+            'Malaysian Ringgit (Singapore Dollar Per Malaysian Ringgit)',
+            'Hong Kong Dollar (Singapore Dollar Per Hong Kong Dollar)',
+            'Australian Dollar (Singapore Dollar Per Australian Dollar)',
+            'Korean Won (Singapore Dollar Per 100 Korean Won)',
+            'New Taiwan Dollar (Singapore Dollar Per 100 New Taiwan Dollar)',
+            'Euro (Singapore Dollar Per Euro)',
+            'Indonesian Rupiah (Singapore Dollar Per 100 Indonesian Rupiah)',
+            'Thai Baht (Singapore Dollar Per 100 Thai Baht)',
+            'Renminbi (Singapore Dollar Per Renminbi)',
+            'Indian Rupee (Singapore Dollar Per 100 Indian Rupee)',
+            'Philippine Peso (Singapore Dollar Per 100 Philippine Peso)',
+            # '  Food',
+            # '  Food Excl Food & Beverage Serving Services',
+            # '  Clothing & Footwear',
+            # '  Housing & Utilities',
+            # '  Household Durables & Services',
+            # '  Health',
+            # '  Transport',
+            # '  Information & Communication',
+            # '  Recreation, Sport & Culture',
+            # '  Education',
+            # '  Miscellaneous Goods & Services',
+            # '  Food & Beverage Serving Services',
+            # '  Restaurants',
+            # '  Fast Food Outlets',
+            # '  Food Caterers',
+            # '  Cafes, Food Courts & Other Eating Places',
+            # '  Department Stores',
+            # '  Supermarkets & Hypermarkets',
+            # '  Mini-Marts & Convenience Stores',
+            # '  Food & Alcohol',
+            # '  Motor Vehicles',
+            # '  Petrol Service Stations',
+            # '  Cosmetics, Toiletries & Medical Goods',
+            # '  Wearing Apparel & Footwear',
+            # '  Furniture & Household Equipment',
+            # '  Recreational Goods',
+            # '  Watches & Jewellery',
+            # '  Computer & Telecommunications Equipment',
+            # '  Optical Goods & Books',
+        ]
 
     # 2. Preprocess the data.
     # main_preprocessing returns both scaled and raw DataFrames.
@@ -33,14 +88,14 @@ def main():
         date_format='%Y %b',
         apply_month_encoding=False,
         apply_scaling=False,
-        train_start='1988-01-01', train_end='2000-12-31',
-        test_start='2001-01-01', test_end='2025-12-31',
+        train_start='1990-01-01', train_end='2009-12-31',
+        test_start='2010-01-01', test_end='2025-12-31',
         return_raw=True
     )
 
     # 3. Choose feature columns and target.
-    feature_cols = ['Value', 'month', 'month_sin', 'month_cos']
-    target_col = 'Value'
+    feature_cols = train_df.columns.to_list()
+    target_col = 'Total International Visitor Arrivals By Inbound Tourism Markets'
     lookback = 36
 
     # 4. Set hyperparameters.
@@ -82,8 +137,8 @@ def main():
     test_dates = actual.index
 
     # Plot Seasonal vs Actual.
-    plot_seasonal_vs_actual(test_dates, actual.values, seasonal_aligned,
-                            title="Seasonal Forecast vs Actual (Test)")
+    # plot_seasonal_vs_actual(test_dates, actual.values, seasonal_aligned,
+    #                         title="Seasonal Forecast vs Actual (Test)")
     # Plot Hybrid vs Actual.
     plot_hybrid_vs_actual(test_dates, y_test, y_pred, title="Hybrid Forecast vs Actual")
     # Plot Combined Forecasts.
