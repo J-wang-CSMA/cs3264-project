@@ -12,12 +12,7 @@ def load_and_preprocess(filepaths, required_rows, date_format='%Y %b', reverse_c
     missing = [r for r in required_rows if r not in df.index]
     if missing:
         raise ValueError(f"Rows not found: {missing}")
-    if len(required_rows) == 1:
-        s = df.loc[required_rows[0]].reset_index()
-        s.columns = ['Date', 'Value']
-        out_df = s
-    else:
-        out_df = df.loc[required_rows].T.reset_index().rename(columns={'index': 'Date'})
+    out_df = df.loc[required_rows].T.reset_index().rename(columns={'index': 'Date'})
     out_df['Date'] = pd.to_datetime(out_df['Date'], format=date_format)
     out_df = out_df.sort_values('Date')
     for col in [c for c in out_df.columns if c != 'Date']:
