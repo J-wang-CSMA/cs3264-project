@@ -3,9 +3,9 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 
-def load_and_preprocess(filepath, required_rows, date_format='%Y %b', reverse_columns=True):
+def load_and_preprocess(filepaths, required_rows, date_format='%Y %b', reverse_columns=True):
     """Load & preprocess CSV, returning a DF with a 'Date' col & one col per required row."""
-    df = pd.read_csv(filepath, header=0, index_col=0)
+    df = pd.concat([pd.read_csv(fp, header=0, index_col=0) for fp in filepaths], axis=0, join='inner')
     df.columns = df.columns.str.strip()
     if reverse_columns:
         df = df[df.columns[::-1]]
@@ -24,9 +24,8 @@ def load_and_preprocess(filepath, required_rows, date_format='%Y %b', reverse_co
         out_df[col] = pd.to_numeric(out_df[col], errors='coerce')
     return out_df.dropna(subset=[c for c in out_df.columns if c != 'Date'])
 
-
 def split_data_by_date(df, date_col='Date',
-                       train_start='1980-01-01', train_end='2000-12-31',
+                       train_start='1988-01-01', train_end='2000-12-31',
                        test_start='2001-01-01', test_end='2025-12-31'):
     """Split df by date range into train & test."""
     train = df[(df[date_col] >= train_start) & (df[date_col] <= train_end)]
@@ -58,13 +57,13 @@ def set_series_monthly_frequency(series):
     return series
 
 
-def main_preprocessing(filepath, required_rows, date_format='%Y %b', reverse_columns=True,
+def main_preprocessing(filepaths, required_rows, date_format='%Y %b', reverse_columns=True,
                        apply_month_encoding=True, apply_scaling=True,
                        train_start='1980-01-01', train_end='2000-12-31',
                        test_start='2001-01-01', test_end='2025-12-31',
                        return_raw=False):
     # Load and preprocess the CSV file (raw)
-    df = load_and_preprocess(filepath, required_rows, date_format, reverse_columns)
+    df = load_and_preprocess(filepaths, required_rows, date_format, reverse_columns)
     # Optionally add cyclical month features
     if apply_month_encoding:
         df = add_month_sin_cos(df, date_col='Date')
