@@ -16,18 +16,24 @@ import numpy as np
 
 def main():
     # 1. Choose the CSV file and required rows.
-    filepath = '../Datasets/international_visitor_arrivals_by_country.csv'
+    filepaths = [
+        '../Datasets/international_visitor_arrivals_by_country.csv',
+        '../Datasets/exchange_rates_per_currency_unit_to_sgd.csv',
+        '../Datasets/consumer_price_index_base_year_2024.csv',
+        '../Datasets/food_beverage_services_index_base_year_2017.csv',
+        '../Datasets/retail_sales_index_base_year_2017.csv',
+    ]
     required_rows = ['Total International Visitor Arrivals By Inbound Tourism Markets']
 
     # 2. Preprocess the data.
     # main_preprocessing returns both scaled and raw DataFrames.
     train_df, test_df, scaler, raw_train_df, raw_test_df = main_preprocessing(
-        filepath,
+        filepaths,
         required_rows,
         date_format='%Y %b',
         apply_month_encoding=False,
         apply_scaling=False,
-        train_start='1980-01-01', train_end='2000-12-31',
+        train_start='1988-01-01', train_end='2000-12-31',
         test_start='2001-01-01', test_end='2025-12-31',
         return_raw=True
     )
